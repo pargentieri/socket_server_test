@@ -2,14 +2,20 @@ const
     {Server} = require("socket.io"),
     server = new Server(3000),
       fs  = require('fs'),
-     readline=require ('readline'),
-     fileStream = fs.createReadStream('./testo.txt');
+     readline=require ('readline');
+     
     
 
 
 
 let
     sequenceNumberByClient = new Map();
+
+    function sleep(ms) {
+        return new Promise((resolve) => {
+          setTimeout(resolve, ms);
+        });
+      }
 
 // event fired every time a new client connects:
 server.on("connection", (socket) => {
@@ -27,12 +33,14 @@ server.on("connection", (socket) => {
         console.log('----->start reading file and send text to client:'+data);
 
         const rl = readline.createInterface({
-            input: fileStream,
+            input: fs.createReadStream('./testo.txt'),
             crlfDelay: Infinity
         });
         rl.on('line', (line) => {
             console.log(`Line: ${line}`);
             socket.emit("text", line);  
+            //await sleep(5000);
+
         });
         
         rl.on('close', () => {
@@ -42,6 +50,7 @@ server.on("connection", (socket) => {
 
 
     });  
+   // fs.close( fileStream, ()=>{} )
 });
 
 // sends each client its current sequence number
